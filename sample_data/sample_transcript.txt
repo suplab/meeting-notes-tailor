@@ -1,0 +1,4 @@
+[00:00:05] Alice: Today we discussed moving to an API-first architecture. We need to define the contract and timeline.
+[00:01:10] Bob: The migration will need infra changes; we may need two extra engineers.
+[00:02:00] Carol: I can own the migration plan; propose milestone dates by next week.
+[00:03:15] Alice: Action: Alice to draft API contract. Bob to prepare migration cost estimate.

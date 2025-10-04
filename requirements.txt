@@ -1,0 +1,6 @@
+fastapi>=0.95
+uvicorn
+pydantic
+python-dotenv
+pytest
+openai
