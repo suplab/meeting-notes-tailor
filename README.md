@@ -1,4 +1,4 @@
-# meeting-notes-tailor — PoC (Structured)
+# Meeting Notes Tailor — PoC (Structured)
 
 ## Project Overview
 
@@ -143,53 +143,51 @@ docker run -p 8000:8000 meeting-notes-tailor:local
 
 ## Prompt templates (examples)
 
-Located in app/prompt_templates.py. Keep prompts short and deterministic.
+Located in `app/prompt_templates.py`. Keep prompts short and deterministic.
 
-Executive (short):
-
+### Executive (short):
+```
 You are a concise executive assistant. Given the following meeting transcript excerpt, produce a 3-sentence summary emphasizing strategic decisions, risks, and senior-level requests.
 
-
 Transcript:
 """
 {chunk}
 """
-
 
 Return JSON: {"summary": "..."}
+```
 
-Team actions (bulleted):
-
+### Team actions (bulleted):
+```
 You are a product ops assistant. From the transcript excerpt, extract concrete action items with: task, owner (if mentioned), due date (if mentioned), and context sentence. Output as JSON list.
 
-
 Transcript:
 {chunk}
+```
 
-Plain recap (for new joiners):
-
+### Plain recap (for new joiners):
+```
 You are explaining to a new team member. Provide a short plain-language recap (4-6 sentences) of what happened and why it matters.
 
-
 Transcript:
 {chunk}
-LLM Adapter (app/llm_adapter.py)
+```
 
-Provide a thin interface: generate(prompt, max_tokens=250) The PoC includes a simple OpenAI-compatible adapter that reads OPENAI_API_KEY from env. Swap with any other provider by implementing same function signature.
+## LLM Adapter (app/llm_adapter.py)
 
-Example minimal code snippets
+Provide a thin interface: `generate(prompt, max_tokens=250)` The PoC includes a simple OpenAI-compatible adapter that reads `OPENAI_API_KEY` from env. Swap with any other provider by implementing same function signature.
 
-Note: these are present in the PoC files. This README only shows representative snippets.
+## Example minimal code snippets
 
-app/summarizer.py orchestrates: parse -> chunk -> send prompts -> aggregate
+> Note: these are present in the PoC files. This README only shows representative snippets.
 
-app/transcript.py contains parse_transcript(text) that returns List[Segment] segments where Segment = {speaker, start, end, text}
+- `app/summarizer.py` orchestrates: parse -> chunk -> send prompts -> aggregate
+- `app/transcript.py` contains `parse_transcript(text)` that returns `List[Segment]` segments where `Segment = {speaker, start, end, text}`
+- `app/prompt_templates.py` exports `TEMPLATES = {"exec": ..., "actions": ..., "recap": ...}`
 
-app/prompt_templates.py exports TEMPLATES = {"exec": ..., "actions": ..., "recap": ...}
+## Sample transcript
 
-Sample transcript
-
-Include sample_data/sample_transcript.txt — a 10–15 minute meeting short excerpt with 3 speakers, some decisions, owners, and one or two deadlines so action extraction has content to work on.
+Include `sample_data/sample_transcript.txt` — a 10–15 minute meeting short excerpt with 3 speakers, some decisions, owners, and one or two deadlines so action extraction has content to work on.
 
 ## Running Tests
 
