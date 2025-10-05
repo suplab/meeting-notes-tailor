@@ -12,6 +12,18 @@ meeting-notes-tailor is a proof-of-concept service designed to transform meeting
 
 This structured approach improves alignment, reduces time spent digesting long meeting notes, and ensures that each stakeholder receives information relevant to their role.
 
+## Tech Stack
+
+- Language: Python 3.11
+- Web Framework: FastAPI
+- Data Validation: Pydantic
+- Environment Management: python-dotenv
+- Async Runtime: asyncio / uvicorn
+- AI Integration: OpenAI GPT-4o-mini (configurable) / Local Fake LLM
+- Testing: pytest
+- Containerization: Docker
+- Build Automation: Makefile
+
 ## Key Features
 
 - AI-powered multi-layered summarization.
@@ -20,6 +32,71 @@ This structured approach improves alignment, reduces time spent digesting long m
 - OpenAI GPT-4o-mini integration for dev environment.
 - Async FastAPI backend with clear modular structure.
 - Docker runtime image for quick deployment.
+
+## Architecture Overview
+```
++---------------------------+
+|   Client / Frontend       |
+|---------------------------|
+| - Sends meeting transcripts|
+| - Receives role-specific  |
+|   summaries               |
++------------+--------------+
+             |
+             v
++---------------------------+
+|   FastAPI Web API          |
+|---------------------------|
+| - Receives POST /summarize|
+| - Validates request using  |
+|   Pydantic schemas        |
+| - Routes request to       |
+|   Summarizer core         |
++------------+--------------+
+             |
+             v
++---------------------------+
+|   Summarizer Core          |
+|---------------------------|
+| - Parses transcript       |
+| - Chunks segments         |
+| - Uses role-specific      |
+|   prompt templates        |
+| - Calls LLM adapter       |
++------------+--------------+
+             |
+             v
++---------------------------+
+|   LLM Adapter Layer        |
+|---------------------------|
+| - Switches between:       |
+|   * Fake LLM (local)     |
+|   * OpenAI GPT-4o-mini   |
+| - Generates role-based    |
+|   summaries asynchronously|
++------------+--------------+
+             |
+             v
++---------------------------+
+|   Output Aggregation       |
+|---------------------------|
+| - Collates exec summary,  |
+|   team actions, and recap  |
+| - Optionally includes     |
+|   sentiment analysis      |
++------------+--------------+
+             |
+             v
++---------------------------+
+|   Response to Client       |
+|---------------------------|
+| - Returns JSON with:      |
+|   * executive_summary      |
+|   * team_actions           |
+|   * plain_recap            |
+|   * sentiment (optional)   |
++---------------------------+
+```
 
 ## Project Structure
 ```
