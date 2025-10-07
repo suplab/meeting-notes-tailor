@@ -14,15 +14,22 @@ This structured approach improves alignment, reduces time spent digesting long m
 
 ## Tech Stack
 
-- Language: Python 3.11
-- Web Framework: FastAPI
-- Data Validation: Pydantic
-- Environment Management: python-dotenv
-- Async Runtime: asyncio / uvicorn
-- AI Integration: OpenAI GPT-4o-mini (configurable) / Local Fake LLM
-- Testing: pytest
-- Containerization: Docker
-- Build Automation: Makefile
+- **Language:** Python 3.11
+- **Web Framework:** FastAPI
+- **Data Validation:** Pydantic
+- **Environment Management:** python-dotenv
+- **Async Runtime:** asyncio / uvicorn
+- **AI Integration:** OpenAI GPT-4o-mini (configurable) / Local Fake LLM
+- **Testing:** pytest
+- **Containerization:** Docker
+- **Build Automation:** Makefile
+- **Compute Runtime:** AWS ECS Fargate 
+- **Container Registry:** AWS ECR 
+- **Networking:** AWS VPC, ALB, Security Groups 
+- **Secrets Management:** AWS Secrets Manager 
+- **Logging:** AWS CloudWatch Logs 
+- **Containerization:** Docker 
+- **CI/CD Ready:** Manual Terraform workflow (CLI) 
 
 ## Key Features
 
@@ -32,6 +39,7 @@ This structured approach improves alignment, reduces time spent digesting long m
 - OpenAI GPT-4o-mini integration for dev environment.
 - Async FastAPI backend with clear modular structure.
 - Docker runtime image for quick deployment.
+- Terraform-based AWS infrastructure for deployment.
 
 ## Architecture Overview
 ```
@@ -115,6 +123,21 @@ meeting-notes-tailor/
 │ └── schemas.py # Pydantic schemas for API
 ├── app/tests/ # Unit tests
 ├── sample_data/ # Example transcript
+|
+├── infra/                       # ⬅️ Terraform-based AWS infrastructure
+│   ├── provider.tf
+│   ├── variables.tf
+│   ├── outputs.tf
+│   ├── network/
+│   │   └── main.tf
+│   ├── ecr/
+│   │   └── main.tf
+│   ├── ecs/
+│   │   └── main.tf
+│   ├── secrets/
+│   │   └── main.tf
+│   └── README.md
+│
 ├── Dockerfile # Runtime container
 ├── Makefile # Local run & build commands
 ├── requirements.txt # Python dependencies
@@ -150,7 +173,7 @@ MODEL_NAME=gpt-4o-mini
 
 ## Setup Instructions
 
-### Local Python Environment
+### 🧪 Local Setup
 
 1. Unzip project and navigate to root folder.
 2. Copy `.env.local` or `.env.dev` to `.env` as appropriate.
@@ -170,13 +193,44 @@ uvicorn app.api.main:app --reload
 ```
 6. Open documentation at http://localhost:8000/docs.
 
-### Docker Runtime
+### 🐳 Docker Build & Run (Optional)
 
 Build and run the runtime container:
 ```bash
 docker build -t meeting-notes-tailor:local .
 docker run -p 8000:8000 meeting-notes-tailor:local
 ```
+
+## ☁️ AWS Deployment via Terraform (Manual)
+
+1. Build and Push Image to ECR
+```bash
+aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin <account>.dkr.ecr.ap-south-1.amazonaws.com
+docker build -t meeting-notes-tailor .
+docker tag meeting-notes-tailor:latest <account>.dkr.ecr.ap-south-1.amazonaws.com/meeting-notes-tailor:latest
+docker push <account>.dkr.ecr.ap-south-1.amazonaws.com/meeting-notes-tailor:latest
+```
+
+2. Deploy Infrastructure
+
+```bash
+cd infra
+terraform init
+terraform plan -var="ecr_image_uri=<account>.dkr.ecr.ap-south-1.amazonaws.com/meeting-notes-tailor:latest"
+terraform apply -var="ecr_image_uri=<account>.dkr.ecr.ap-south-1.amazonaws.com/meeting-notes-tailor:latest" -auto-approve
+```
+
+After apply:
+- Terraform will output the ALB DNS Name.
+- Access the API at http://<alb-dns-name>/docs.
+
+### Outputs
+
+| Output             | Description                             |
+| ------------------ | --------------------------------------- |
+| `alb_dns_name`     | Public endpoint for the FastAPI service |
+| `ecr_repo_url`     | ECR repository where image is stored    |
+| `ecs_cluster_name` | ECS cluster managing Fargate tasks      |
 
 
 ## API Usage
@@ -284,3 +338,8 @@ pytest app/tests/
 - Integration with meeting platforms (Zoom, Teams) for automatic transcript ingestion.
 - UI dashboard for viewing summaries by role.
 - Async OpenAI SDK or alternative LLM providers.
+- Integrate AWS API Gateway for endpoint routing.
+- Add async OpenAI SDK integration.
+- Introduce CloudFront for caching summaries.
+- Use RDS or DynamoDB for transcript storage.
+- Enable CI/CD pipeline via GitHub Actions.
